@@ -45,7 +45,7 @@ bool flag = false;
 double st;
 void Writeans(){
     sort(agents.begin(),agents.end(),cmp2);
-    ofstream outputFile("./output.txt");
+    ofstream outputFile("./output1.txt");
     if (!outputFile) {
         cerr << "Unable to open file";
         exit(1);
@@ -61,7 +61,7 @@ void Writeans(){
 void dfs(int id){
     //Iter++;
     //cout<<"Iter: "<<Iter<<endl;
-    if(((clock()-st)/CLOCKS_PER_SEC)>300){
+    if(((clock()-st)/CLOCKS_PER_SEC)>3600){
         cout<<"Time out"<<endl;
         Writeans();
         return;
@@ -94,27 +94,9 @@ void dfs(int id){
         }
     }
     else{
-        if((total_cost>=min_cost and min_cost!=-1) or servers.size()>best_k+5)
+        if((total_cost>=min_cost and min_cost!=-1) or servers.size()>best_k*1.1)
             return;
-        vector<pair<int,int> > v;
         for(int i=0;i<servers.size();i++){
-            int serverid = i;
-            if(servers[i]>agents[id].mem){
-                //servers[i] -= agents[id].mem;
-                int w0=0;
-                for(int j=0;j<agents[id].teamid.size();j++){
-                    int teamid = agents[id].teamid[j];
-                    if(team_servers[teamid][serverid]==0){
-                        // num: 3->4, cost: (3*3-2*2)=5=(2*2+1)
-                        w0 += max((team_num_servers[teamid]-1)*2+1,0);
-                    }
-                }
-                v.emplace_back(w0,i);
-            }
-        }
-        sort(v.begin(),v.end());
-        for(auto p2:v){
-            int i=p2.second;
             int serverid = i;
             if(servers[i]>agents[id].mem){
                 servers[i] -= agents[id].mem;
@@ -142,7 +124,7 @@ void dfs(int id){
                 agents[id].serverid = -1;
             }
         }
-        if(servers.size()<best_k+5){
+        if(servers.size()<best_k*1.1){
             servers.push_back(memory_limit-agents[id].mem);
             int serverid = servers.size()-1;
             agents[id].serverid = serverid;
@@ -169,7 +151,7 @@ void dfs(int id){
     }
 }
 signed main(){
-    ifstream inputFile("./input.txt");
+    ifstream inputFile("./ISPD98_ibm01.txt");
     if (!inputFile) {
         cerr << "Unable to open file";
         exit(1);
