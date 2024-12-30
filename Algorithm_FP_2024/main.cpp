@@ -8,6 +8,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <tuple>
 using namespace std;
 struct agent{
     int id;
@@ -96,7 +97,7 @@ void dfs(int id){
     else{
         if((total_cost>=min_cost and min_cost!=-1) or servers.size()>best_k+5)
             return;
-        vector<pair<int,int> > v;
+        vector<tuple<int,int,int> > v;
         for(int i=0;i<servers.size();i++){
             int serverid = i;
             if(servers[i]>agents[id].mem){
@@ -109,12 +110,16 @@ void dfs(int id){
                         w0 += max((team_num_servers[teamid]-1)*2+1,0);
                     }
                 }
-                v.emplace_back(w0,i);
+                v.emplace_back(w0,rand(),i);
             }
         }
         sort(v.begin(),v.end());
-        for(auto p2:v){
-            int i=p2.second;
+        int l=0;
+        int K=5;
+        for(tuple<int,int,int> Tuple:v){
+            int i=get<2>(Tuple);
+            l++;
+            if(l>=K) break;
             int serverid = i;
             if(servers[i]>agents[id].mem){
                 servers[i] -= agents[id].mem;
@@ -169,6 +174,7 @@ void dfs(int id){
     }
 }
 signed main(){
+    srand(time(0));
     ifstream inputFile("./input.txt");
     if (!inputFile) {
         cerr << "Unable to open file";

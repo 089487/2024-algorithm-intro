@@ -8,6 +8,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <tuple>
 using namespace std;
 struct agent{
     int id;
@@ -61,7 +62,7 @@ void Writeans(){
 void dfs(int id){
     //Iter++;
     //cout<<"Iter: "<<Iter<<endl;
-    if(((clock()-st)/CLOCKS_PER_SEC)>3600){
+    if(((clock()-st)/CLOCKS_PER_SEC)>7200){
         cout<<"Time out"<<endl;
         Writeans();
         return;
@@ -94,9 +95,27 @@ void dfs(int id){
         }
     }
     else{
-        if((total_cost>=min_cost and min_cost!=-1) or servers.size()>best_k*1.1)
+        if((total_cost>=min_cost and min_cost!=-1) or servers.size()>best_k+5)
             return;
+        vector<tuple<int,int,int> > v;
         for(int i=0;i<servers.size();i++){
+            int serverid = i;
+            if(servers[i]>agents[id].mem){
+                //servers[i] -= agents[id].mem;
+                int w0=0;
+                for(int j=0;j<agents[id].teamid.size();j++){
+                    int teamid = agents[id].teamid[j];
+                    if(team_servers[teamid][serverid]==0){
+                        // num: 3->4, cost: (3*3-2*2)=5=(2*2+1)
+                        w0 += max((team_num_servers[teamid]-1)*2+1,0);
+                    }
+                }
+                v.emplace_back(w0,rand(),i);
+            }
+        }
+        sort(v.begin(),v.end());
+        for(tuple<int,int,int> Tuple:v){
+            int i=get<2>(Tuple);
             int serverid = i;
             if(servers[i]>agents[id].mem){
                 servers[i] -= agents[id].mem;
@@ -124,7 +143,7 @@ void dfs(int id){
                 agents[id].serverid = -1;
             }
         }
-        if(servers.size()<best_k*1.1){
+        if(servers.size()<best_k+5){
             servers.push_back(memory_limit-agents[id].mem);
             int serverid = servers.size()-1;
             agents[id].serverid = serverid;
@@ -151,6 +170,7 @@ void dfs(int id){
     }
 }
 signed main(){
+    srand(time(0));
     ifstream inputFile("./ISPD98_ibm02.txt");
     if (!inputFile) {
         cerr << "Unable to open file";
@@ -186,7 +206,7 @@ signed main(){
     }
     team_servers.resize(m);
     team_num_servers.resize(m,0);
-    best_k = 2;
+    best_k = n;
     sort(agents.begin(),agents.end(),cmp3);
     dfs(0);
     inputFile.close();
